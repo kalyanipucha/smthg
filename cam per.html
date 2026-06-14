@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photo Verification</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    background:#ffe6f2;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.container{
+    width:420px;
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 0 20px rgba(0,0,0,.15);
+}
+
+h2{
+    color:#ff1493;
+    margin-bottom:10px;
+}
+
+p{
+    margin-bottom:15px;
+}
+
+video{
+    width:100%;
+    border-radius:15px;
+    margin-top:15px;
+    display:none;
+}
+
+button{
+    background:#ff69b4;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:10px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+#status{
+    margin-top:15px;
+    font-weight:bold;
+}
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h2>📷 Photo Verification</h2>
+
+    <p>
+        This process will capture and upload 3 photos.
+    </p>
+
+    <button id="allowBtn">
+        Allow Camera
+    </button>
+
+    <br>
+
+    <video id="video" autoplay playsinline></video>
+
+    <br>
+
+    <button id="captureBtn" style="display:none;">
+        Start Capture
+    </button>
+
+    <div id="status"></div>
+
+</div>
+
+<script>
+
+const SUPABASE_URL =
+"https://azsxeufcpyergcizsloa.supabase.co";
+
+const SUPABASE_KEY =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6c3hldWZjcHllcmdjaXpzbG9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNjU5NjIsImV4cCI6MjA5Njk0MTk2Mn0.7-EKKb0PHhg0gN7YkIrPNKwP37Xnu6OoVR43jlfbJmw";
+
+const supabase =
+window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const video =
+document.getElementById("video");
+
+const statusDiv =
+document.getElementById("status");
+
+let stream;
+
+document
+.getElementById("allowBtn")
+.onclick = async () => {
+
+    try{
+
+        stream =
+        await navigator.mediaDevices
+        .getUserMedia({
+            video:true
+        });
+
+        video.srcObject = stream;
+
+        video.style.display = "block";
+
+        document
+        .getElementById("captureBtn")
+        .style.display = "inline-block";
+
+        statusDiv.innerText =
+        "Camera ready.";
+
+    }
+    catch(err){
+
+        console.error(err);
+
+        statusDiv.innerText =
+        "Camera permission denied.";
+    }
+};
+
+document
+.getElementById("captureBtn")
+.onclick = async () => {
+
+    statusDiv.innerText =
+    "Capturing photos...";
+
+    for(let i=1;i<=3;i++){
+
+        const base64 =
+        await capturePhoto();
+
+        statusDiv.innerText =
+        `Uploading photo ${i}/3`;
+
+        const url =
+        await uploadImage(base64,i);
+
+        if(url){
+
+            await saveToDatabase(url);
+
+        }
+
+        await new Promise(
+            r => setTimeout(r,1000)
+        );
+    }
+
+    statusDiv.innerText =
+    "All photos uploaded successfully.";
+};
+
+function capturePhoto(){
+
+    return new Promise(resolve=>{
+
+        const canvas =
+        document.createElement("canvas");
+
+        canvas.width =
+        video.videoWidth;
+
+        canvas.height =
+        video.videoHeight;
+
+        const ctx =
+        canvas.getContext("2d");
+
+        ctx.drawImage(
+            video,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
+        const img =
+        canvas.toDataURL(
+            "image/jpeg",
+            0.9
+        );
+
+        resolve(img);
+    });
+}
+
+async function uploadImage(
+    base64Image,
+    index
+){
+
+    try{
+
+        const blob =
+        await (
+            await fetch(base64Image)
+        ).blob();
+
+        const fileName =
+        `photo_${Date.now()}_${index}.jpg`;
+
+        const { error } =
+        await supabase.storage
+        .from("photos")
+        .upload(
+            fileName,
+            blob
+        );
+
+        if(error){
+
+            console.error(error);
+
+            return null;
+        }
+
+        const { data } =
+        supabase.storage
+        .from("photos")
+        .getPublicUrl(
+            fileName
+        );
+
+        return data.publicUrl;
+
+    }
+    catch(err){
+
+        console.error(err);
+
+        return null;
+    }
+}
+
+async function saveToDatabase(
+    imageUrl
+){
+
+    const { error } =
+    await supabase
+    .from("messages")
+    .insert({
+        name:"Camera User",
+        message:"Photo Upload",
+        image_url:imageUrl
+    });
+
+    if(error){
+
+        console.error(error);
+
+    }
+}
+
+</script>
+
+</body>
+</html>
